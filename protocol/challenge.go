@@ -3,6 +3,7 @@ package protocol
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/json"
 )
 
 // ChallengeLength - Length of bytes to generate for a challenge
@@ -24,4 +25,20 @@ func CreateChallenge() (Challenge, error) {
 
 func (c Challenge) String() string {
 	return base64.RawURLEncoding.EncodeToString(c)
+}
+
+func (c Challenge) MarshalJSON() ([]byte, error) {
+	return URLEncodedBase64(c).MarshalJSON()
+}
+
+func (c *Challenge) UnmarshalJSON(data []byte) error {
+	var encoded URLEncodedBase64
+
+	if err := json.Unmarshal(data, &encoded); err != nil {
+		return err
+	}
+
+	*c = Challenge(encoded)
+
+	return nil
 }
